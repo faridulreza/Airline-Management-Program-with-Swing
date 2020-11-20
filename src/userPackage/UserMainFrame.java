@@ -149,6 +149,7 @@ public class UserMainFrame {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 
 		headingPanel.setBorder(BorderFactory.createRaisedBevelBorder());
 		tabPanel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2, true));
@@ -232,7 +233,9 @@ public class UserMainFrame {
 						EventQueue.invokeLater(new Runnable() {
 							@Override
 							public void run() {
-								lb.setIcon(new ImageIcon("data\\userData\\" + ps.username + ".png"));
+								lb.setIcon(new ImageIcon(img));
+								lb.revalidate();
+								lb.repaint();
 							}
 							
 						});
