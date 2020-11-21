@@ -18,7 +18,7 @@ public class AllFlightsViewJpanel extends JPanel{
 	 * Create the panel.
 	 */
 	
-	public AllFlightsViewJpanel(ArrayList<FlightModel> flightList) {
+	public AllFlightsViewJpanel(ArrayList<FlightModel> flightList,int val) {
 		this.flightList = flightList;
 		height=flightList.size()*(3+100)+10;
 		setBackground(Color.WHITE);
@@ -29,8 +29,7 @@ public class AllFlightsViewJpanel extends JPanel{
 
 			@Override
 			public int compare(FlightModel arg0, FlightModel arg1) {
-				// TODO Auto-generated method stub
-				return Long.compare(arg1.dateInMilli+arg1.timeInMilli, arg0.dateInMilli+arg0.timeInMilli);
+				return Long.compare(arg1.dateInMilli+arg1.timeInMilli, arg0.dateInMilli+arg0.timeInMilli)*val;
 			}
 			
 		});

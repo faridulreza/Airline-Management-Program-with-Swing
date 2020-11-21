@@ -147,9 +147,9 @@ public class ManagerMainFrame {
 		myBookingsButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				contentPanel.removeAll();
-				JScrollPane js=new JScrollPane(new AllFlightsViewJpanel(FlightModel.getFlightList()));
+				JScrollPane js=new JScrollPane(new AllFlightsViewJpanel(FlightModel.getFlightList(),1));
 				js.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-				js.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+				js.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 				contentPanel.add(js);
 				contentPanel.revalidate();
 				contentPanel.repaint();
@@ -159,6 +159,14 @@ public class ManagerMainFrame {
 		tabPanel.add(myBookingsButton, "cell 0 4,grow");
 
 		JButton searchFlightButton = new JButton("Find a Flight");
+		searchFlightButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				contentPanel.removeAll();
+				contentPanel.add(new SearchPanelForManager());
+				contentPanel.revalidate();
+				contentPanel.repaint();
+			}
+		});
 		searchFlightButton.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 18));
 		tabPanel.add(searchFlightButton, "cell 0 6,grow");
 
