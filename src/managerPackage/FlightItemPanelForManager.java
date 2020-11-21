@@ -15,8 +15,6 @@ import javax.swing.JOptionPane;
 
 import java.awt.Font;
 import java.awt.Color;
-import java.awt.Dimension;
-
 import javax.swing.JSeparator;
 import javax.swing.JButton;
 import java.util.Calendar;

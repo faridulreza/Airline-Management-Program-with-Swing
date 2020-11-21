@@ -13,29 +13,23 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.SpringLayout;
-
-import com.github.lgooddatepicker.components.DatePicker;
 
 import net.miginfocom.swing.MigLayout;
 import utilities.FlightModel;
 
 
 import java.awt.Font;
-import java.awt.ScrollPane;
 import java.awt.Color;
 
 import javax.swing.BorderFactory;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionEvent;
-import javax.swing.JComboBox;
 
 public class ManagerMainFrame {
 
