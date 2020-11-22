@@ -6,6 +6,8 @@ import javax.swing.JFrame;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -15,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -30,10 +33,15 @@ import java.awt.Dimension;
 
 import javax.swing.SpringLayout;
 import net.miginfocom.swing.MigLayout;
+import utilities.FlightModel;
+
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
+
+import managerPackage.AllFlightsViewJpanel;
+
 import com.jgoodies.forms.layout.FormSpecs;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -49,6 +57,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 
 import java.awt.AlphaComposite;
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -56,6 +65,7 @@ import javax.swing.JFileChooser;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionEvent;
 
@@ -63,7 +73,7 @@ public class UserMainFrame {
 
 	private JFrame frame;
 	private static PersonModel ps;
-
+    private static ArrayList<FlightModel> flightList;
 	/**
 	 * Launch the application.
 	 */
@@ -90,6 +100,8 @@ public class UserMainFrame {
 	 */
 	public UserMainFrame() {
 		initialize();
+		flightList=FlightModel.getFlightList();
+		//for(Integer i:ps.bookedFlightIDSet)System.out.println(i);
 	}
 
 	/**
@@ -99,6 +111,15 @@ public class UserMainFrame {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 950, 750);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter() {
+
+			public void windowClosing(WindowEvent evt) {
+				ps.writeData();
+				FlightModel.saveFlightList();
+
+			}
+		});
+		
 		SpringLayout springLayout = new SpringLayout();
 		frame.getContentPane().setLayout(springLayout);
 
@@ -110,6 +131,7 @@ public class UserMainFrame {
 		frame.getContentPane().add(tabPanel);
 
 		JPanel ContentPanel = new JPanel();
+		ContentPanel.setLayout(new BorderLayout());
 		springLayout.putConstraint(SpringLayout.NORTH, ContentPanel, 55, SpringLayout.NORTH, frame.getContentPane());
 		springLayout.putConstraint(SpringLayout.WEST, ContentPanel, 6, SpringLayout.EAST, tabPanel);
 		tabPanel.setLayout(new MigLayout("", "[200px]", "[200px][20px][45px][][45px][][45px][][][][]"));
@@ -155,10 +177,35 @@ public class UserMainFrame {
 		tabPanel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2, true));
 
 		JButton bookNowButton = new JButton("Book Now");
+		bookNowButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				ContentPanel.removeAll();
+				ContentPanel.add(new SearchPanelForUser(ps));
+				ContentPanel.revalidate();
+				ContentPanel.repaint();
+			}
+		});
 		bookNowButton.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 20));
 		tabPanel.add(bookNowButton, "cell 0 2,grow");
 
 		JButton myBookingsButton = new JButton("My Bookings");
+		myBookingsButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				ContentPanel.removeAll();
+				ArrayList<FlightModel> tmpList=new ArrayList<>();
+				for(FlightModel flt:flightList) {
+					if(ps.bookedFlightIDSet.contains(flt.ID))tmpList.add(flt);
+				}
+				
+				JScrollPane js=new JScrollPane(new AllFlightsViewForUser(tmpList, 1, ps));
+				js.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				js.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+				
+				ContentPanel.add(js);
+				ContentPanel.revalidate();
+				ContentPanel.repaint();
+			}
+		});
 		myBookingsButton.setFont(new Font("Yu Gothic UI Semibold", Font.BOLD, 20));
 		tabPanel.add(myBookingsButton, "cell 0 4,grow");
 
@@ -168,6 +215,8 @@ public class UserMainFrame {
 				File f = new File("data\\userData\\session.txt");
 				if (f.isFile())
 					f.delete();
+				ps.writeData();
+			    FlightModel.saveFlightList();
 				frame.setVisible(false);
 				frame.dispose();
 				UserLogin.reRun();

@@ -1,4 +1,4 @@
-package managerPackage;
+package userPackage;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -20,29 +20,29 @@ import javax.swing.JSeparator;
 import javax.swing.JButton;
 import java.util.Calendar;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 
-public class FlightItemPanelForManager extends JPanel {
+public class FlightItemPanelForUser extends JPanel {
 
 	private JLabel departTimeLabel;
 	private JLabel arrivalTimeLabel;
 	private JLabel dateLabel;
-	private JButton delayButton;
+	private JButton printNrefundNbookButton;
 	private JButton cancelFlightButton;
 	private JLabel statusLabel;
 	private FlightModel flt;
+	private static PersonModel ps;
+	private boolean isBooked, isOngoingOrFinished, isCancelled;
 	private JLabel availSeatsLabel;
-	private JLabel lblNewLabel_1;
 
 	/**
 	 * Create the panel.
 	 */
 
-	public FlightItemPanelForManager(FlightModel flt) {
+	public FlightItemPanelForUser(FlightModel flt, PersonModel pss) {
 		this.flt = flt;
-		this.setBounds(0,0,714,100);
+		this.ps = pss;
+		this.setBounds(0, 0, 714, 100);
 		setBackground(Color.WHITE);
 		setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		setLayout(null);
@@ -120,52 +120,17 @@ public class FlightItemPanelForManager extends JPanel {
 		bussinessClassLabel.setBounds(426, 58, 56, 13);
 		add(bussinessClassLabel);
 
-		delayButton = new JButton("Delay");
-		delayButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				String s = JOptionPane.showInputDialog(null,"Delay time for flight "+flt.ID +" :(by hours)");
-				if (s != null && !s.isEmpty()) {
-					try {
-						long d = (long) (Double.valueOf(s) * 1000 * 60 * 60);
-						flt.delayedByInMilli += d;
-						flt.status = flt.FLIGHT_DELAYED;
-						Calendar cd = Calendar.getInstance();
-						cd.setTimeInMillis(flt.dateInMilli + flt.timeInMilli + d);
+		printNrefundNbookButton = new JButton("Book Now");
+		printNrefundNbookButton.setForeground(Color.WHITE);
+		printNrefundNbookButton.setBackground(Color.BLUE);
+		printNrefundNbookButton.setFont(new Font("Yu Gothic UI Semibold", Font.PLAIN, 12));
+		printNrefundNbookButton.setBounds(592, 30, 100, 44);
 
-						flt.timeInMilli = cd.get(Calendar.HOUR) * 60 * 60 * 1000l + cd.get(Calendar.MINUTE) * 60 * 1000l
-								+ cd.get(Calendar.SECOND) * 1000l + cd.get(Calendar.MILLISECOND);
-						cd.add(Calendar.MILLISECOND, (int) -flt.timeInMilli);
-						flt.dateInMilli = cd.getTimeInMillis();
-						bindTimeData();
-						setStatus();
-
-					} catch (Exception e) {
-					}
-				}
-			}
-		});
-		delayButton.setForeground(Color.WHITE);
-		delayButton.setBackground(Color.BLUE);
-		delayButton.setFont(new Font("Yu Gothic UI Semibold", Font.PLAIN, 12));
-		delayButton.setBounds(592, 20, 100, 25);
-		add(delayButton);
-
-		cancelFlightButton = new JButton("Cancel");
-		cancelFlightButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				int result = JOptionPane.showConfirmDialog(null, "Cancel the flight "+flt.ID+ "?", "Confirm",
-						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-				if (result == JOptionPane.YES_OPTION) {
-				     flt.status=flt.FLIGHT_CANCELLED;
-				     setStatus();
-				}
-			}
-		});
+		cancelFlightButton = new JButton("Manage");
 		cancelFlightButton.setBackground(Color.BLUE);
 		cancelFlightButton.setForeground(Color.WHITE);
 		cancelFlightButton.setFont(new Font("Yu Gothic UI Semibold", Font.PLAIN, 12));
 		cancelFlightButton.setBounds(592, 58, 100, 25);
-		add(cancelFlightButton);
 
 		statusLabel = new JLabel("on schedule");
 		statusLabel.setFont(new Font("Tahoma", Font.PLAIN, 8));
@@ -173,17 +138,12 @@ public class FlightItemPanelForManager extends JPanel {
 		statusLabel.setBounds(576, 4, 128, 13);
 		add(statusLabel);
 
-		availSeatsLabel = new JLabel("36");
+		availSeatsLabel = new JLabel(""+flt.seatCount);
 		availSeatsLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		availSeatsLabel.setBounds(514, 57, 45, 13);
 		add(availSeatsLabel);
 
-		lblNewLabel_1 = new JLabel("Available Seats");
-		lblNewLabel_1.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent e) {
-				SeatPanel.run(flt, null, null);
-			}
-		});
+		JLabel lblNewLabel_1 = new JLabel("Available Seats");
 		lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 10));
 		lblNewLabel_1.setBounds(504, 44, 70, 13);
 		add(lblNewLabel_1);
@@ -194,13 +154,137 @@ public class FlightItemPanelForManager extends JPanel {
 		availSeatsLabel.setText("" + flt.seatCount);
 		DecimalFormat df = new DecimalFormat("#.##");
 		durationLabel.setText(df.format(flt.durationInMilli / (1000 * 60 * 60.0)) + " hours");
-		bussinessClassLabel.setText("$ "+df.format(flt.priceBussiness));
-		economyClassPriceLabel.setText("$ "+df.format(flt.priceEconomy));
+		bussinessClassLabel.setText("$ " + df.format(flt.priceBussiness));
+		economyClassPriceLabel.setText("$ " + df.format(flt.priceEconomy));
 		departureCityLabel.setText(flt.source);
 		arrivalCityLabel.setText(flt.destination);
 
+		setUp();
+	}
+
+	public void setUp() {
 		bindTimeData();
 		setStatus();
+		if (ps.bookedFlightIDSet.contains(flt.ID))
+			isBooked = true;
+		setButtons();
+	}
+
+	private ActionListener listenerForPrint = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+
+		}
+
+	};
+	private ActionListener listenerForCancel = new ActionListener() {
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+
+		}
+
+	};
+
+	private void setButtons() {
+		this.remove(cancelFlightButton);
+		this.remove(printNrefundNbookButton);
+
+		if (isOngoingOrFinished) {
+
+		} else if (isBooked) {
+			if (isCancelled) {
+				double refundVal=0;
+				for(int i=0;i<9;i++)
+					for(int j=0;j<4;j++) {
+						if(flt.seatMap[i][j]!=null && flt.seatMap[i][j].equals(ps.username)) {
+							if(i<3)refundVal+=flt.priceBussiness;
+							else refundVal+=flt.priceEconomy;
+							flt.seatMap[i][j]=null;
+						}
+					}
+				
+				if(Math.abs(refundVal)<1e-8)return;
+				
+				final String refund=new DecimalFormat("#.##").format(refundVal);
+				printNrefundNbookButton.removeActionListener(listenerForPrint);
+				listenerForPrint = new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						JOptionPane.showMessageDialog(null, "You have recieved 100% refund : $ "+refund+". We are extremely sorry for your inconvinience");
+						setUp();
+					}
+				};
+				
+				
+				printNrefundNbookButton.addActionListener(listenerForPrint);
+				printNrefundNbookButton.setBounds(592, 30, 100, 44);
+				printNrefundNbookButton.setText("Get Refund");
+				add(printNrefundNbookButton);
+			
+			} else {
+				
+				printNrefundNbookButton.removeActionListener(listenerForPrint);
+				listenerForPrint = new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						// TODO: print Ticket
+					}
+				};
+				printNrefundNbookButton.addActionListener(listenerForPrint);
+
+				cancelFlightButton.removeActionListener(listenerForCancel);
+				listenerForCancel = new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						// TODO open seatPanel for seat cancel or management
+                        SeatPanel.run(flt, ps, new Runnable() {
+
+							@Override
+							public void run() {
+								setUp();
+								availSeatsLabel.setText(flt.seatCount+"");
+							}});
+					}
+
+				};
+				cancelFlightButton.addActionListener(listenerForCancel);
+
+				
+				cancelFlightButton.setText("Manage");
+				printNrefundNbookButton.setText("Print Ticket");
+				cancelFlightButton.setBounds(592, 58, 100, 25);
+				printNrefundNbookButton.setBounds(592, 20, 100, 25);
+				add(printNrefundNbookButton);
+				add(cancelFlightButton);
+			}
+
+		} else if(!isCancelled){
+			printNrefundNbookButton.removeActionListener(listenerForPrint);
+			listenerForPrint = new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					// TODO: open seatPanel for booking
+                    SeatPanel.run(flt, ps, new Runnable() {
+
+						@Override
+						public void run() {
+							setUp();
+							availSeatsLabel.setText(flt.seatCount+"");
+							
+						}});
+				}
+			};
+			printNrefundNbookButton.addActionListener(listenerForPrint);
+			
+			printNrefundNbookButton.setBounds(592, 30, 100, 44);
+			printNrefundNbookButton.setText("Book Now");
+			add(printNrefundNbookButton);
+		}
 
 	}
 
@@ -208,12 +292,8 @@ public class FlightItemPanelForManager extends JPanel {
 		if (flt.status == flt.FLIGHT_CANCELLED) {
 			statusLabel.setText("Cancelled");
 			statusLabel.setForeground(Color.RED);
-			  remove(delayButton);
-              remove(cancelFlightButton);
-              remove(availSeatsLabel);
-              remove(lblNewLabel_1 );
-              
 			this.setBorder(BorderFactory.createLineBorder(Color.RED));
+			isCancelled = true;
 		} else if (flt.status == flt.FLIGHT_DELAYED) {
 			statusLabel.setText("Delayed by "
 					+ new DecimalFormat("#.##").format((flt.delayedByInMilli / (1000 * 60 * 60.0))) + " hours");
@@ -230,12 +310,12 @@ public class FlightItemPanelForManager extends JPanel {
 				statusLabel.setText("ongoing");
 				statusLabel.setForeground(Color.GREEN);
 				this.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+				isOngoingOrFinished = true;
 			} else {
 				statusLabel.setText("Finished");
 				statusLabel.setForeground(Color.BLACK);
 				this.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                remove(delayButton);
-                remove(cancelFlightButton);
+				isOngoingOrFinished = true;
 			}
 
 		}
@@ -254,7 +334,5 @@ public class FlightItemPanelForManager extends JPanel {
 		b = (int) ((flt.timeInMilli / (1000 * 60)) % 60);
 		departTimeLabel.setText((a < 10 ? "0" + a : a) + ":" + (b < 10 ? "0" + b : b));
 	}
-	
-	
 
 }

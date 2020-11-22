@@ -49,7 +49,7 @@ import java.awt.Color;
 
 public class UserLogin {
 
-	private JFrame frame;
+	public JFrame frame;
 	private JLabel lblNewLabel;
 	private JLabel lblNewLabel_1;
 	private JTextField textField;

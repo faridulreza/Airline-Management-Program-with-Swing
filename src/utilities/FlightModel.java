@@ -25,7 +25,7 @@ public class FlightModel implements Serializable {
 	public Long  durationInMilli=0l,delayedByInMilli=0l;
 	public double  priceBussiness,priceEconomy;
 	public int status=FLIGHT_NORMAL,ID,seatCount=36;
-	public String[][] seatMap = new String[12][4];
+	public String[][] seatMap = new String[10][4];
 
 	
 	public static ArrayList<FlightModel> getFlightList() {
@@ -56,10 +56,10 @@ public class FlightModel implements Serializable {
 			  out.writeObject(flightList);  
 			  out.flush();   
 			  out.close();  
-			 // System.out.println("success");  
+			  //System.out.println("flightList saved");  
 			  }
 		 catch(Exception e){
-			 //System.out.println(e);
+			 e.printStackTrace();
 			 }  
 		 
 	}
