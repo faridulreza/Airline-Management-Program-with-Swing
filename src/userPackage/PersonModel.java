@@ -15,6 +15,7 @@ public class PersonModel implements Serializable {
 	public String passWordHash;
 	public Integer trophies =0;
 	public Set<Integer> bookedFlightIDSet = new HashSet<>();
+	public Set<Integer> trophiesToGetFrom = new HashSet<>();
 
 	PersonModel() {
 	}

@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -99,9 +100,24 @@ public class UserMainFrame {
 	 * Create the application.
 	 */
 	public UserMainFrame() {
-		initialize();
 		flightList=FlightModel.getFlightList();
-		//for(Integer i:ps.bookedFlightIDSet)System.out.println(i);
+		
+		
+		long tm=Calendar.getInstance().getTimeInMillis();
+		
+	    for(FlightModel flt:flightList) {
+	    	if(ps.trophiesToGetFrom.contains(flt.ID)) {
+	    		if(flt.status==flt.FLIGHT_CANCELLED) {
+	    			ps.trophiesToGetFrom.remove(flt.ID);
+	    		}
+	    		else if(tm>flt.dateInMilli+flt.timeInMilli+flt.durationInMilli) {
+	    	   		ps.trophies+=(int)(flt.durationInMilli/(1000*60*60))+1;
+	    	   		ps.trophiesToGetFrom.remove(flt.ID);
+	    	   	}
+	    	}
+	    }
+	    
+	    initialize();
 	}
 
 	/**
@@ -155,7 +171,7 @@ public class UserMainFrame {
 
 		JLabel headingLb = new JLabel("Cheap flight tickets, Find yourself in travelling!");
 		headingLb.setForeground(new Color(165, 42, 42));
-		headingLb.setFont(new Font("Papyrus", Font.BOLD, 18));
+		headingLb.setFont(new Font("Lucida Bright", Font.BOLD, 18));
 		headingPanel.add(headingLb, "cell 1 0,alignx center,aligny center");
 
 		JLabel trophyLb = new JLabel("10000");
@@ -181,6 +197,7 @@ public class UserMainFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				ContentPanel.removeAll();
 				ContentPanel.add(new SearchPanelForUser(ps));
+				headingLb.setText("Cheap flight ticket, Find Yourself in travelling!");
 				ContentPanel.revalidate();
 				ContentPanel.repaint();
 			}
@@ -202,6 +219,7 @@ public class UserMainFrame {
 				js.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 				
 				ContentPanel.add(js);
+				headingLb.setText("Manage your bookings with ease");
 				ContentPanel.revalidate();
 				ContentPanel.repaint();
 			}
@@ -231,6 +249,8 @@ public class UserMainFrame {
 		// Bind userData
 		setUserImage(nameLb);
 		trophyLb.setText(String.valueOf(ps.trophies));
+		
+		myBookingsButton.doClick();
 	}
 
 	

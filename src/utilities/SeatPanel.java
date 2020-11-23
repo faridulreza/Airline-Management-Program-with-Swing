@@ -7,7 +7,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
+import java.util.Scanner;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -26,7 +32,7 @@ public class SeatPanel extends JPanel {
 	 */
 	private FlightModel flt;
 	private JLabel[][] labels = new JLabel[10][4];
-	private seatChooserMouseAdapter mAdapter=new seatChooserMouseAdapter();
+	private seatChooserMouseAdapter mAdapter = new seatChooserMouseAdapter();
 	private JLabel lblNewLabel_1;
 	private Runnable rn;
 	private JButton payButton;
@@ -35,7 +41,7 @@ public class SeatPanel extends JPanel {
 	private static PersonModel ps;
 	private double totalPrice = 0;
 	private int appliedTrophy = 0;
-	private int totalSeatForUser=0;
+	private int totalSeatForUser = 0;
 
 	public static void run(FlightModel flt, PersonModel pss, Runnable rn) {
 
@@ -145,7 +151,7 @@ public class SeatPanel extends JPanel {
 							JOptionPane.INFORMATION_MESSAGE);
 				} else {
 					int res = JOptionPane.showConfirmDialog(null,
-							"Pay $ " + new DecimalFormat("#.##").format(totalPrice) + " ?", "Payment",
+							"Pay $   " + new DecimalFormat("#.##").format(totalPrice) + "   ?", "Payment",
 							JOptionPane.YES_NO_OPTION);
 					if (res == 0) {
 						// set selected seats for user and close
@@ -155,7 +161,7 @@ public class SeatPanel extends JPanel {
 								if (labels[i][j].getBackground().equals(Color.GREEN)) {
 									flt.seatMap[i][j] = new String(ps.username);
 									labels[i][j].setBackground(Color.YELLOW);
-									labels[i][j].setToolTipText("Reserved for you\n Click to cancel");
+									labels[i][j].setToolTipText("Reserved -Click to cancel");
 									labels[i][j].removeMouseListener(mAdapter);
 									labels[i][j].addMouseListener(new seatCancelMouseAdapter());
 									flt.seatCount--;
@@ -165,6 +171,7 @@ public class SeatPanel extends JPanel {
 						}
 
 						ps.bookedFlightIDSet.add(flt.ID);
+						ps.trophiesToGetFrom.add(flt.ID);
 						JOptionPane.showMessageDialog(null, "Success! Thank you for choosing us.");
 						payButton.setText("$ 0");
 						totalPrice = 0;
@@ -199,7 +206,7 @@ public class SeatPanel extends JPanel {
 			}
 
 		}
-		
+
 	}
 
 	class seatChooserMouseAdapter extends MouseAdapter {
@@ -232,25 +239,30 @@ public class SeatPanel extends JPanel {
 		@Override
 		public void mouseClicked(MouseEvent arg0) {
 			JLabel lb = (JLabel) arg0.getSource();
-			int res = JOptionPane.showConfirmDialog(null,"Cancel seat "+lb.getText()+"? You will be refunded with 70% of the price.", "Cancel reservation",
-					JOptionPane.YES_NO_OPTION);
-			
-			if(res==0) {
+			int res = JOptionPane.showConfirmDialog(null,
+					"Cancel seat " + lb.getText() + "?\nYou will be refunded with only 70% of the price.",
+					"Cancel reservation", JOptionPane.YES_NO_OPTION);
+
+			if (res == 0) {
 				lb.removeMouseListener(this);
 				lb.setToolTipText(null);
 				lb.setBackground(Color.WHITE);
 				lb.addMouseListener(mAdapter);
-				double pd=0;
-				if(lb.getText().charAt(0)>'C')pd=flt.priceEconomy;
-				else pd=flt.priceBussiness;
-				flt.seatMap[lb.getText().charAt(0)-'A'][lb.getText().charAt(1)-'1']=null;
-				pd*=.7;
+				double pd = 0;
+				if (lb.getText().charAt(0) > 'C')
+					pd = flt.priceEconomy;
+				else
+					pd = flt.priceBussiness;
+				flt.seatMap[lb.getText().charAt(0) - 'A'][lb.getText().charAt(1) - '1'] = null;
+				pd *= .7;
 				flt.seatCount++;
 				totalSeatForUser--;
-				if(totalSeatForUser==0) {
+				if (totalSeatForUser == 0) {
 					ps.bookedFlightIDSet.remove(flt.ID);
+					ps.trophiesToGetFrom.remove(flt.ID);
 				}
-				JOptionPane.showMessageDialog(null, "You have Recieved $ "+new DecimalFormat("#.##").format(pd)+" !");
+				JOptionPane.showMessageDialog(null,
+						"You have Recieved $ " + new DecimalFormat("#.##").format(pd) + " !");
 				rn.run();
 			}
 		}
@@ -263,7 +275,7 @@ public class SeatPanel extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// TODO Print details
+                    //TODO print details
 
 			}
 

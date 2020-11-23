@@ -9,17 +9,22 @@ import javax.swing.SwingConstants;
 import utilities.FlightModel;
 import utilities.SeatPanel;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Color;
 import javax.swing.JSeparator;
 import javax.swing.JButton;
 import java.util.Calendar;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 
 public class FlightItemPanelForUser extends JPanel {
@@ -34,6 +39,7 @@ public class FlightItemPanelForUser extends JPanel {
 	private static PersonModel ps;
 	private boolean isBooked, isOngoingOrFinished, isCancelled;
 	private JLabel availSeatsLabel;
+	private JLabel lblNewLabel_1;
 
 	/**
 	 * Create the panel.
@@ -138,12 +144,12 @@ public class FlightItemPanelForUser extends JPanel {
 		statusLabel.setBounds(576, 4, 128, 13);
 		add(statusLabel);
 
-		availSeatsLabel = new JLabel(""+flt.seatCount);
+		availSeatsLabel = new JLabel("" + flt.seatCount);
 		availSeatsLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		availSeatsLabel.setBounds(514, 57, 45, 13);
 		add(availSeatsLabel);
 
-		JLabel lblNewLabel_1 = new JLabel("Available Seats");
+		lblNewLabel_1 = new JLabel("Available Seats");
 		lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 10));
 		lblNewLabel_1.setBounds(504, 44, 70, 13);
 		add(lblNewLabel_1);
@@ -194,43 +200,61 @@ public class FlightItemPanelForUser extends JPanel {
 
 		} else if (isBooked) {
 			if (isCancelled) {
-				double refundVal=0;
-				for(int i=0;i<9;i++)
-					for(int j=0;j<4;j++) {
-						if(flt.seatMap[i][j]!=null && flt.seatMap[i][j].equals(ps.username)) {
-							if(i<3)refundVal+=flt.priceBussiness;
-							else refundVal+=flt.priceEconomy;
-							flt.seatMap[i][j]=null;
+				remove(availSeatsLabel);
+				remove(lblNewLabel_1);
+				double refundVal = 0;
+				for (int i = 0; i < 9; i++)
+					for (int j = 0; j < 4; j++) {
+						if (flt.seatMap[i][j] != null && flt.seatMap[i][j].equals(ps.username)) {
+							if (i < 3)
+								refundVal += flt.priceBussiness;
+							else
+								refundVal += flt.priceEconomy;
+							flt.seatMap[i][j] = null;
 						}
 					}
-				
-				if(Math.abs(refundVal)<1e-8)return;
-				
-				final String refund=new DecimalFormat("#.##").format(refundVal);
+
+				if (Math.abs(refundVal) < 1e-8)
+					return;
+
+				final String refund = new DecimalFormat("#.##").format(refundVal);
 				printNrefundNbookButton.removeActionListener(listenerForPrint);
 				listenerForPrint = new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
-						JOptionPane.showMessageDialog(null, "You have recieved 100% refund : $ "+refund+". We are extremely sorry for your inconvinience");
+						JOptionPane.showMessageDialog(null, "You have recieved 100% refund : $ " + refund
+								+ ". We are extremely sorry for your inconvinience");
 						setUp();
 					}
 				};
-				
-				
+
 				printNrefundNbookButton.addActionListener(listenerForPrint);
 				printNrefundNbookButton.setBounds(592, 30, 100, 44);
 				printNrefundNbookButton.setText("Get Refund");
 				add(printNrefundNbookButton);
-			
+
 			} else {
-				
+
 				printNrefundNbookButton.removeActionListener(listenerForPrint);
 				listenerForPrint = new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
 						// TODO: print Ticket
+						PrintTicketPanel tc = new PrintTicketPanel(flt, ps);
+						BufferedImage image = new BufferedImage(350, 650, BufferedImage.TYPE_INT_ARGB);
+						Graphics g = image.getGraphics();
+						tc.paint(g);
+						try {
+							String userHomeFolder = System.getProperty("user.home");
+							File f = new File(userHomeFolder+"\\Desktop", "YourTicket.png");
+
+							ImageIO.write(image, "png", f);
+							JOptionPane.showMessageDialog(null, "Your ticket is saved to Desktop.\n("+f.getAbsolutePath()+")");
+						} catch (IOException ex) {
+							JOptionPane.showMessageDialog(null, "Error Saving Ticket");
+						}
 					}
 				};
 				printNrefundNbookButton.addActionListener(listenerForPrint);
@@ -241,19 +265,19 @@ public class FlightItemPanelForUser extends JPanel {
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
 						// TODO open seatPanel for seat cancel or management
-                        SeatPanel.run(flt, ps, new Runnable() {
+						SeatPanel.run(flt, ps, new Runnable() {
 
 							@Override
 							public void run() {
 								setUp();
-								availSeatsLabel.setText(flt.seatCount+"");
-							}});
+								availSeatsLabel.setText(flt.seatCount + "");
+							}
+						});
 					}
 
 				};
 				cancelFlightButton.addActionListener(listenerForCancel);
 
-				
 				cancelFlightButton.setText("Manage");
 				printNrefundNbookButton.setText("Print Ticket");
 				cancelFlightButton.setBounds(592, 58, 100, 25);
@@ -262,25 +286,26 @@ public class FlightItemPanelForUser extends JPanel {
 				add(cancelFlightButton);
 			}
 
-		} else if(!isCancelled){
+		} else if (!isCancelled) {
 			printNrefundNbookButton.removeActionListener(listenerForPrint);
 			listenerForPrint = new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					// TODO: open seatPanel for booking
-                    SeatPanel.run(flt, ps, new Runnable() {
+					SeatPanel.run(flt, ps, new Runnable() {
 
 						@Override
 						public void run() {
 							setUp();
-							availSeatsLabel.setText(flt.seatCount+"");
-							
-						}});
+							availSeatsLabel.setText(flt.seatCount + "");
+
+						}
+					});
 				}
 			};
 			printNrefundNbookButton.addActionListener(listenerForPrint);
-			
+
 			printNrefundNbookButton.setBounds(592, 30, 100, 44);
 			printNrefundNbookButton.setText("Book Now");
 			add(printNrefundNbookButton);

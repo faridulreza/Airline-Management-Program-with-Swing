@@ -7,6 +7,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 
+import managerPackage.ManagerMainFrame;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -44,6 +45,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
 
@@ -70,48 +72,21 @@ public class UserLogin {
 	private JButton lblNewLabel_2;
 	private Component verticalStrut_3;
 	private JLabel background;
+	private JCheckBox isManager;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					File f = new File("data\\userData\\session.txt");
-					if (f.isFile()) {
-						ObjectInputStream in = new ObjectInputStream(
-								new FileInputStream("data\\userData\\session.txt"));
-						String s = (String) in.readObject();
-						in.close();
-						PersonModel ps = PersonModel.getPersonModel(s);
-						if (ps != null) {
-							UserMainFrame.run(ps);
-						} else {
-							UserLogin window = new UserLogin();
-							window.frame.pack();
-							window.frame.setSize(450, 360);
-							window.frame.setLocationRelativeTo(null);
-							window.frame.setVisible(true);
-						}
-					} else {
-						UserLogin window = new UserLogin();
-						window.frame.pack();
-						window.frame.setSize(450, 360);
-						window.frame.setLocationRelativeTo(null);
-						window.frame.setVisible(true);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+             reRun();
 	}
+
 	public static void reRun() {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
 					File f = new File("data\\userData\\session.txt");
+					File ff = new File("data\\managerSession.txt");
 					if (f.isFile()) {
 						ObjectInputStream in = new ObjectInputStream(
 								new FileInputStream("data\\userData\\session.txt"));
@@ -120,26 +95,27 @@ public class UserLogin {
 						PersonModel ps = PersonModel.getPersonModel(s);
 						if (ps != null) {
 							UserMainFrame.run(ps);
-						} else {
-							UserLogin window = new UserLogin();
-							window.frame.pack();
-							window.frame.setSize(450, 360);
-							window.frame.setLocationRelativeTo(null);
-							window.frame.setVisible(true);
+							return;
 						}
-					} else {
-						UserLogin window = new UserLogin();
-						window.frame.pack();
-						window.frame.setSize(450, 360);
-						window.frame.setLocationRelativeTo(null);
-						window.frame.setVisible(true);
 					}
+
+					if (ff.isFile()) {
+						ManagerMainFrame.run();
+						return;
+					}
+
+					UserLogin window = new UserLogin();
+					window.frame.pack();
+					window.frame.setSize(450, 360);
+					window.frame.setLocationRelativeTo(null);
+					window.frame.setVisible(true);
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
-		
+
 	}
 
 	/**
@@ -184,7 +160,6 @@ public class UserLogin {
 		background.add(textField, "cell 4 3,grow");
 		textField.setColumns(10);
 		textField.setBorder(BorderFactory.createLineBorder(Color.BLUE, 1, true));
-		
 
 		horizontalStrut_2 = Box.createHorizontalStrut(20);
 		background.add(horizontalStrut_2, "cell 6 4");
@@ -207,6 +182,11 @@ public class UserLogin {
 
 		verticalStrut_2 = Box.createVerticalStrut(20);
 		background.add(verticalStrut_2, "cell 4 6");
+
+		isManager = new JCheckBox("Admin");
+		isManager.setBackground(new Color(0, 0, 0, 0));
+		isManager.setFont(new Font("Yu Gothic UI Semilight", Font.PLAIN, 10));
+		background.add(isManager, "cell 3 8");
 
 		panel = new JPanel();
 		panel.setBackground(new Color(0, 0, 0, 0));
@@ -262,31 +242,41 @@ public class UserLogin {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				PersonModel ps = validate();
-				if (ps != null) {
-
-					File f = new File("data\\userData\\session.txt");
-					try {
-						f.createNewFile();
-						FileOutputStream fout = new FileOutputStream("data\\userData\\session.txt");
-						ObjectOutputStream out = new ObjectOutputStream(fout);
-						out.writeObject(new String(ps.username));
-						out.flush();
-						out.close();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+				if (isManager.isSelected()) {
+					if (validateForManager()) {
+						frame.setVisible(false);
+						frame.dispose();
+						ManagerMainFrame.run();
 					}
-					
-					frame.setVisible(false);
-					frame.dispose();
-					UserMainFrame.run(ps);
-				}
-
+				} else
+					logInAsUser();
 			}
 
 		});
 
+	}
+
+	private void logInAsUser() {
+		PersonModel ps = validate();
+		if (ps != null) {
+
+			File f = new File("data\\userData\\session.txt");
+			try {
+				f.createNewFile();
+				FileOutputStream fout = new FileOutputStream("data\\userData\\session.txt");
+				ObjectOutputStream out = new ObjectOutputStream(fout);
+				out.writeObject(new String(ps.username));
+				out.flush();
+				out.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			frame.setVisible(false);
+			frame.dispose();
+			UserMainFrame.run(ps);
+		}
 	}
 
 	private PersonModel validate() {
@@ -313,6 +303,53 @@ public class UserLogin {
 		}
 
 		return ps;
+	}
+
+	ArrayList<String> managerList;
+
+	private boolean validateForManager() {
+		if (managerList == null) {
+			try {
+				ObjectInputStream in = new ObjectInputStream(new FileInputStream("data\\managerList.txt"));
+				managerList = (ArrayList<String>) in.readObject();
+				in.close();
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(null, "Could not fetch Manager Info.", "Read Error",
+						JOptionPane.ERROR_MESSAGE);
+				return false;
+			}
+
+		}
+
+		if (textField.getText().trim().isEmpty() || textField_1.getText().trim().isEmpty()) {
+			JOptionPane.showMessageDialog(null, "Please fill up all the fields", "Blank Field",
+					JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+
+		String s = textField.getText().trim() + "#" + textField_1.getText().trim();
+
+		if (managerList.contains(s)) {
+			try {
+				File f = new File("data\\managerSession.txt");
+				if (f.exists())
+					f.delete();
+
+				FileOutputStream fout = new FileOutputStream("data\\managerSession.txt");
+				ObjectOutputStream out = new ObjectOutputStream(fout);
+				out.writeObject(s);
+				out.flush();
+				out.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return true;
+		} else {
+			JOptionPane.showMessageDialog(null, "Invalid ID or Password for manager", "Error", JOptionPane.ERROR_MESSAGE);
+			textField_1.setEchoChar((char) 0);
+		}
+
+		return false;
 	}
 
 }

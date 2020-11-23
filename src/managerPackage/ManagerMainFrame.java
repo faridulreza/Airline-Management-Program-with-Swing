@@ -16,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.SpringLayout;
 
 import net.miginfocom.swing.MigLayout;
+import userPackage.UserLogin;
 import utilities.FlightModel;
 
 
@@ -109,7 +110,7 @@ public class ManagerMainFrame {
 
 		JLabel headingLb = new JLabel("Cheap flight tickets, Find yourself in travelling!");
 		headingLb.setForeground(new Color(165, 42, 42));
-		headingLb.setFont(new Font("Papyrus", Font.BOLD, 18));
+		headingLb.setFont(new Font("Lucida Console", Font.BOLD, 18));
 		headingPanel.add(headingLb, "cell 1 0,alignx center,aligny center");
 		try {
 			BufferedImage img = ImageIO.read(new File("images\\trophy.png"));
@@ -129,6 +130,7 @@ public class ManagerMainFrame {
 				if (mCreateFlightPanel == null)
 					mCreateFlightPanel = new CreateFlightPanel();
 				contentPanel.removeAll();
+				headingLb.setText("Create a flight in seconds");
 				contentPanel.add(mCreateFlightPanel);
 				contentPanel.revalidate();
 				contentPanel.repaint();
@@ -144,6 +146,7 @@ public class ManagerMainFrame {
 				JScrollPane js=new JScrollPane(new AllFlightsViewJpanel(FlightModel.getFlightList(),1));
 				js.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 				js.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+				headingLb.setText("List of Flights created so far");
 				contentPanel.add(js);
 				contentPanel.revalidate();
 				contentPanel.repaint();
@@ -156,7 +159,9 @@ public class ManagerMainFrame {
 		searchFlightButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				contentPanel.removeAll();
+				
 				contentPanel.add(new SearchPanelForManager());
+				headingLb.setText("Quickly search and manage a flight");
 				contentPanel.revalidate();
 				contentPanel.repaint();
 			}
@@ -175,13 +180,14 @@ public class ManagerMainFrame {
 				FlightModel.saveFlightList();
 				frame.setVisible(false);
 				frame.dispose();
-				ManagerLogin.reRun();
+				UserLogin.reRun();
 			}
 		});
+		
 
 		tabPanel.add(logoutButton, "cell 0 8,grow");
 
-		// Bind userData
+		myBookingsButton.doClick();
 
 	}
 }

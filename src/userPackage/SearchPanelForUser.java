@@ -201,7 +201,7 @@ public class SearchPanelForUser extends JPanel {
 		searchHolderJpanel.setBounds(0, 54, 735, 498);
 		searchHolderJpanel.setLayout(new BorderLayout(0, 0));
 		add(searchHolderJpanel);
-		
+		this.search(false);
 
 	}
 
@@ -268,6 +268,7 @@ public class SearchPanelForUser extends JPanel {
 				}
 			}
 		}
+		
 		
 		
 

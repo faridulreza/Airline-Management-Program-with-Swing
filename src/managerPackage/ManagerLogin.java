@@ -88,6 +88,7 @@ public class ManagerLogin {
 	private Component verticalStrut_2;
 	private JButton lblNewLabel_2;
 	private Component verticalStrut_3;
+	
 
 	/**
 	 * Launch the application.
@@ -226,7 +227,7 @@ public class ManagerLogin {
 			public void actionPerformed(ActionEvent arg0) {
 				// check for user and open main window
 
-				if (validate()) {
+				if (validateForManager()) {
 					frame.setVisible(false);
 					frame.dispose();
 					ManagerMainFrame.run();
@@ -240,7 +241,7 @@ public class ManagerLogin {
 
 	ArrayList<String> managerList;
 
-	private boolean validate() {
+	private boolean validateForManager() {
 		if (managerList == null) {
 			try {
 				ObjectInputStream in = new ObjectInputStream(new FileInputStream("data\\managerList.txt"));
