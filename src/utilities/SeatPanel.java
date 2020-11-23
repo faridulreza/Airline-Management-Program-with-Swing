@@ -13,6 +13,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Scanner;
 
 import javax.swing.BorderFactory;
@@ -32,7 +34,7 @@ public class SeatPanel extends JPanel {
 	 */
 	private FlightModel flt;
 	private JLabel[][] labels = new JLabel[10][4];
-	private seatChooserMouseAdapter mAdapter = new seatChooserMouseAdapter();
+	private seatChooserMouseAdapter[][] mAdapter = new seatChooserMouseAdapter[10][4];
 	private JLabel lblNewLabel_1;
 	private Runnable rn;
 	private JButton payButton;
@@ -162,7 +164,7 @@ public class SeatPanel extends JPanel {
 									flt.seatMap[i][j] = new String(ps.username);
 									labels[i][j].setBackground(Color.YELLOW);
 									labels[i][j].setToolTipText("Reserved -Click to cancel");
-									labels[i][j].removeMouseListener(mAdapter);
+									labels[i][j].removeMouseListener(mAdapter[i][j]);
 									labels[i][j].addMouseListener(new seatCancelMouseAdapter());
 									flt.seatCount--;
 									totalSeatForUser++;
@@ -201,7 +203,8 @@ public class SeatPanel extends JPanel {
 				}
 
 				else {
-					labels[i][j].addMouseListener(mAdapter);
+					mAdapter[i][j]=new seatChooserMouseAdapter();
+					labels[i][j].addMouseListener(mAdapter[i][j]);
 				}
 			}
 
@@ -247,7 +250,7 @@ public class SeatPanel extends JPanel {
 				lb.removeMouseListener(this);
 				lb.setToolTipText(null);
 				lb.setBackground(Color.WHITE);
-				lb.addMouseListener(mAdapter);
+				lb.addMouseListener(mAdapter[lb.getText().charAt(0) - 'A'][lb.getText().charAt(1) - '1']);
 				double pd = 0;
 				if (lb.getText().charAt(0) > 'C')
 					pd = flt.priceEconomy;
@@ -276,6 +279,34 @@ public class SeatPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
                     //TODO print details
+				    String s=System.getProperty("user.home")+"\\Desktop\\FlightDeatails_"+flt.ID+".txt";
+				    File f=new File(s);
+				    try {
+				    	PrintWriter pw=new PrintWriter(f);
+				    	pw.println("Flight ID : "+flt.ID);
+				    	pw.println("From      : "+flt.source);
+				    	pw.println("To        : "+flt.destination);
+				    	pw.println("Time      : "+new SimpleDateFormat().format(flt.dateInMilli+flt.timeInMilli));
+				    	pw.println("\n   Seat   |    Booked By");
+				    	
+				    	for(int i=0;i<9;i++)
+				    		for(int j=0;j<4;j++) {
+				    			for(int k=0;k<30;k++)pw.print("-");
+				    			
+				    			String st=(char)('A'+i)+""+(char)('1'+j);
+				    			if(flt.seatMap[i][j]==null)pw.println("\n    "+st+"    |       N/A");
+				    			else pw.println("\n    "+st+"    |   "+flt.seatMap[i][j]);
+				    			
+				    		}
+				    pw.close();
+				    JOptionPane.showMessageDialog(null, "Flight details is saved to your desktop.\n("+f.getAbsolutePath()+")");
+				   
+				    }
+				    catch(Exception e) {
+				    	e.printStackTrace();
+				    	JOptionPane.showMessageDialog(null, "Couldn't create file");
+				    }
+				    
 
 			}
 

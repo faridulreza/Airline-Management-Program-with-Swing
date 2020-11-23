@@ -48,6 +48,7 @@ public class FlightItemPanelForUser extends JPanel {
 	public FlightItemPanelForUser(FlightModel flt, PersonModel pss) {
 		this.flt = flt;
 		this.ps = pss;
+	
 		this.setBounds(0, 0, 714, 100);
 		setBackground(Color.WHITE);
 		setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -269,6 +270,7 @@ public class FlightItemPanelForUser extends JPanel {
 
 							@Override
 							public void run() {
+							    if(UserMainFrame.trophyLb!=null)UserMainFrame.trophyLb.setText(ps.trophies+"");
 								setUp();
 								availSeatsLabel.setText(flt.seatCount + "");
 							}
@@ -297,6 +299,7 @@ public class FlightItemPanelForUser extends JPanel {
 
 						@Override
 						public void run() {
+						    if(UserMainFrame.trophyLb!=null)UserMainFrame.trophyLb.setText(ps.trophies+"");
 							setUp();
 							availSeatsLabel.setText(flt.seatCount + "");
 

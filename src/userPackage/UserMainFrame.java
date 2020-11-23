@@ -73,8 +73,10 @@ import java.awt.event.ActionEvent;
 public class UserMainFrame {
 
 	private JFrame frame;
+	public static JLabel trophyLb;
 	private static PersonModel ps;
     private static ArrayList<FlightModel> flightList;
+    
 	/**
 	 * Launch the application.
 	 */
@@ -174,7 +176,7 @@ public class UserMainFrame {
 		headingLb.setFont(new Font("Lucida Bright", Font.BOLD, 18));
 		headingPanel.add(headingLb, "cell 1 0,alignx center,aligny center");
 
-		JLabel trophyLb = new JLabel("10000");
+		trophyLb = new JLabel("10000");
 		trophyLb.setForeground(new Color(165, 42, 42));
 		trophyLb.setFont(new Font("Yu Gothic UI Semilight", Font.BOLD, 15));
 		headingPanel.add(trophyLb, "cell 3 0,alignx right,aligny center");
